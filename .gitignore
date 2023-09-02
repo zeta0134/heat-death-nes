@@ -1,0 +1,8 @@
+build
+*.nes
+*.sav
+*.o
+*.dbg
+audiodump.raw
+*.pyc
+*.DS_Store
