@@ -1,5 +1,6 @@
         .setcpu "6502"
 
+        .include "chr.inc"
         .include "far_call.inc"
         .include "main.inc"
         .include "memory_util.inc"
@@ -29,6 +30,13 @@ start:
         sta $4010 ; DMC DMA
 
         jsr init_audio
+
+        lda #2
+        jsr play_track
+
+        far_call FAR_init_palettes
+        far_call FAR_init_nametable
+        far_call FAR_init_chr
 
         ; initialize the prng seed to a nonzero value
         lda #1

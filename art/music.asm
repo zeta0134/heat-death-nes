@@ -67,13 +67,33 @@ ft_groove_list:
 ; Song pointer list
 ft_song_list:
 	.word ft_song_0
+	.word ft_song_1
+	.word ft_song_2
 
 ; Song info
 ft_song_0:
 	.word ft_s0_frames
 	.byte 1	; frame count
 	.byte 64	; pattern length
+	.byte 6	; speed
+	.byte 150	; tempo
+	.byte 0	; groove position
+	.byte 0	; initial bank
+
+ft_song_1:
+	.word ft_s1_frames
+	.byte 1	; frame count
+	.byte 64	; pattern length
 	.byte 3	; speed
+	.byte 150	; tempo
+	.byte 0	; groove position
+	.byte 0	; initial bank
+
+ft_song_2:
+	.word ft_s2_frames
+	.byte 1	; frame count
+	.byte 64	; pattern length
+	.byte 6	; speed
 	.byte 150	; tempo
 	.byte 0	; groove position
 	.byte 0	; initial bank
@@ -87,19 +107,33 @@ ft_song_0:
 ft_s0_frames:
 	.word ft_s0f0
 ft_s0f0:
-	.word ft_s0p0c0, ft_s0p0c1, ft_s0p0c1, ft_s0p0c1, ft_s0p0c5, ft_s0p0c1
+	.word ft_s0p0c0, ft_s0p0c0, ft_s0p0c0, ft_s0p0c0, ft_s0p0c0, ft_s0p0c0
 ; Bank 0
 ft_s0p0c0:
+	.byte $00, $3F
+
+; Bank 0
+ft_s1_frames:
+	.word ft_s1f0
+ft_s1f0:
+	.word ft_s1p0c0, ft_s0p0c0, ft_s0p0c0, ft_s0p0c0, ft_s1p0c5, ft_s0p0c0
+; Bank 0
+ft_s1p0c0:
 	.byte $00, $07, $E1, $F8, $25, $01, $7E, $0D, $F8, $25, $01, $7E, $0D, $F8, $25, $01, $7E, $0D, $F8, $25
 	.byte $01, $7E, $05
 
 ; Bank 0
-ft_s0p0c1:
-	.byte $00, $3F
+ft_s1p0c5:
+	.byte $E0, $19, $01, $7E, $0D, $19, $01, $7E, $0D, $19, $01, $7E, $0D, $19, $01, $7E, $0D
 
 ; Bank 0
-ft_s0p0c5:
-	.byte $E0, $19, $01, $7E, $0D, $19, $01, $7E, $0D, $19, $01, $7E, $0D, $19, $01, $7E, $0D
+ft_s2_frames:
+	.word ft_s2f0
+ft_s2f0:
+	.word ft_s0p0c0, ft_s0p0c0, ft_s0p0c0, ft_s0p0c0, ft_s2p0c5, ft_s0p0c0
+; Bank 0
+ft_s2p0c5:
+	.byte $E0, $F1, $19, $3F
 
 
 ; DPCM samples (located at DPCM segment)

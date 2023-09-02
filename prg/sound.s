@@ -43,18 +43,24 @@ music_module:
         .segment "PRGFIXED_C000"
 
 track_table_bank:
-        .repeat 4
+        .repeat 3
         .lobytes .bank(music_module)
         .endrepeat
         
 track_table_song:
-        .byte 0 ; metronome
+        .byte 0 ; silence
+        .byte 1 ; metronome
+        .byte 2 ; drone
 
 track_table_num_variants:
+        .byte 1 ; silence
         .byte 1 ; metronome
+        .byte 1 ; drone
 
 track_table_variant_length:
+        .byte 0 ; silence
         .byte 0 ; metronome
+        .byte 0 ; drone
 
 .proc init_audio
         ; Always initialize the music engine with track 0 of the first module. This will
