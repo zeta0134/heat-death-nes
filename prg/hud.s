@@ -41,9 +41,10 @@ done:
 .proc perform_hud_split
     lda PPUSTATUS
 
-    ; set PPUSCROLL to 0,0 to display the HUD (and also align a sprite zero hit)
+    ; set PPUSCROLL to 0,192 to display the HUD (and also align a sprite zero hit)
     lda #0
     sta PPUSCROLL
+    lda #192
     sta PPUSCROLL
     lda #PPUCTRL_BASE
     sta PPUCTRL
