@@ -244,7 +244,7 @@ load_first_entry:
 
         ; Now work out the new volume to write to the PCM level; the behavior
         ; varies somewhat for sawtooth and square
-        jmp (zsaw_timbre_ptr) ; will jump to one of the following blocks
+        jmp (zsaw_timbre_ptr) ; (5) will jump to one of the following blocks
 
 load_next_entry:
         ; Just like loading the first entry, without a sequence reset
@@ -255,7 +255,9 @@ load_next_entry:
         sta $4010 ; (4) set the period + interrupt for this sample
         iny ; (2)
         sty zsaw_pos ; (3)
-        jmp restart_dmc
+
+        ; fallthrough
+        ;jmp restart_dmc
 .endproc
 
 .proc restart_dmc
@@ -263,8 +265,8 @@ load_next_entry:
         sta $4015 ; (4)
         ; Now for housekeeping.
         ; First, if NMI asked us to perform OAM DMA, do that here
-        bit zsaw_oam_pending
-        bpl no_oam_needed
+        bit zsaw_oam_pending ; (3)
+        bpl no_oam_needed ; (2, 3t)
         lda #$00
         sta $2003 ; OAM ADDR
         lda #ZSAW_SHADOW_OAM
@@ -272,10 +274,10 @@ load_next_entry:
         inc zsaw_oam_pending
 no_oam_needed:
         ; At this point it is safe for NMI interrupt the IRQ routine
-        inc irq_active
+        inc irq_active ; (6)
         ; If we need to perform a manual NMI, do that now
-        bit zsaw_nmi_pending
-        bpl no_nmi_needed
+        bit zsaw_nmi_pending ; (3)
+        bpl no_nmi_needed ; (2, 3t)
         inc zsaw_nmi_pending
         jsr zsaw_manual_nmi ; this should preserve all registers, including X
 no_nmi_needed:
@@ -324,7 +326,7 @@ done_picking_phase:
         ; (the direction is controlled by which sample is playing)
         lda zsaw_volume ; (3)
         sta $4011 ; (4)
-        jmp restart_dmc
+        jmp restart_dmc ; (3)
 .endproc
 
 .proc timbre_triangle

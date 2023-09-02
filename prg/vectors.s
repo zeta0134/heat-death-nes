@@ -3,6 +3,7 @@
 .include "action53.inc"
 .include "bhop/bhop.inc"
 .include "bhop/zsaw.inc"
+.include "hud.inc"
 .include "input.inc"
 .include "main.inc"
 .include "memory_util.inc"
@@ -89,6 +90,13 @@ all_frames:
 
         ; Advance the global pRNG once every frame
         jsr next_rand
+
+        ; TODO: these paths should diverge, so that we can update the audio engine first
+        ; on rendered frames. It should complete well before the sprite zero hit needs to
+        ; happen (? one hopes) and saves us from wasting **all** of those cycles doing the
+        ; big spinwait
+
+        jsr perform_hud_split
 
 nmi_soft_disable:
         ; because audio can trigger bank switching, here we read and preserve the action53 shadow register

@@ -12,6 +12,9 @@ test_palette:
     .incbin "../art/test_pal.pal"
 test_nametable:
     .incbin "../art/test_nametable.nam"
+test_nametable_2:
+    .incbin "../art/test_nametable_2.nam"
+
 
 .proc FAR_init_palettes
 SourceAddr := R0
@@ -41,6 +44,36 @@ bg_loop:
 .endproc
 
 .proc FAR_init_nametable
+SourceAddr := R0
+Length := R2
+    st16 SourceAddr, test_nametable
+    st16 Length, 1024
+
+    lda PPUSTATUS
+    set_ppuaddr #$2000
+
+    ldy #0
+loop:
+    lda (SourceAddr), y
+    sta PPUDATA
+    inc16 SourceAddr
+    dec16 Length
+    lda Length
+    ora Length+1
+    bne loop
+
+    st16 SourceAddr, test_nametable_2
+    st16 Length, 1024
+    ldy #0
+loop2:
+    lda (SourceAddr), y
+    sta PPUDATA
+    inc16 SourceAddr
+    dec16 Length
+    lda Length
+    ora Length+1
+    bne loop2
+
     rts
 .endproc
 
@@ -60,7 +93,7 @@ loop:
     inc16 SourceAddr
     dec16 Length
     lda Length
-    ora Length
+    ora Length+1
     bne loop
 
     rts
