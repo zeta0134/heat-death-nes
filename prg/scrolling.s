@@ -218,7 +218,7 @@ ColCounter := R10
     lda #8
     sta ColCounter
 
-loop:
+left_nametable_loop:
     ; attributes
     mov16 StartingPpuAddrAttributes, PpuAddrAttributes
     jsr draw_column_attributes
@@ -262,12 +262,65 @@ loop:
 
     ; process the vram buffer here, otherwise we'll fill it up
     ; and smash our stack
-
     jsr vram_slowboat
 
-    ; TODO: would loop here
     dec ColCounter
-    jne loop
+    jne left_nametable_loop
+
+    st16 PpuAddrTiles, $2400
+    st16 PpuAddrAttributes, $27C0
+
+    lda #8
+    sta ColCounter
+
+right_nametable_loop:
+    ; attributes
+    mov16 StartingPpuAddrAttributes, PpuAddrAttributes
+    jsr draw_column_attributes
+    inc16 PpuAddrAttributes
+
+    ; left half of column 0
+    write_vram_header_ptr PpuAddrTiles, #24, VRAM_INC_32
+    ldx VRAM_TABLE_INDEX
+    jsr draw_column_left_half_tiles
+    stx VRAM_TABLE_INDEX
+    inc VRAM_TABLE_ENTRIES
+    inc16 PpuAddrTiles
+
+    ; right half of column 0
+    write_vram_header_ptr PpuAddrTiles, #24, VRAM_INC_32
+    ldx VRAM_TABLE_INDEX
+    jsr draw_column_right_half_tiles
+    stx VRAM_TABLE_INDEX
+    inc VRAM_TABLE_ENTRIES
+    inc16 PpuAddrTiles
+
+    add16b MapColumnPtr, #16
+
+    ; left half of column 1
+    write_vram_header_ptr PpuAddrTiles, #24, VRAM_INC_32
+    ldx VRAM_TABLE_INDEX
+    jsr draw_column_left_half_tiles
+    stx VRAM_TABLE_INDEX
+    inc VRAM_TABLE_ENTRIES
+    inc16 PpuAddrTiles
+
+    ; right half of column 1
+    write_vram_header_ptr PpuAddrTiles, #24, VRAM_INC_32
+    ldx VRAM_TABLE_INDEX
+    jsr draw_column_right_half_tiles
+    stx VRAM_TABLE_INDEX
+    inc VRAM_TABLE_ENTRIES
+    inc16 PpuAddrTiles
+
+    add16b MapColumnPtr, #16
+
+    ; process the vram buffer here, otherwise we'll fill it up
+    ; and smash our stack
+    jsr vram_slowboat
+
+    dec ColCounter
+    jne right_nametable_loop
 
     rts
 .endproc
