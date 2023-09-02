@@ -171,6 +171,9 @@ if __name__ == '__main__':
     if tilemap.height != 16:
         print(f"{input_filename}: invalid map height! height must be exactly 16")
         sys.exit(-1)
+    if (tilemap.width % 2) != 0:
+        print(f"{input_filename}: invalid map width! width must be a multiple of 2")
+        sys.exit(-1)
 
     with open(output_filename, "w") as output_file:
       write_level(tilemap, output_file)

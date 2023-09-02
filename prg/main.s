@@ -10,6 +10,7 @@
         .include "nes.inc"
         .include "ppu.inc"
         .include "prng.inc"
+        .include "scrolling.inc"
         .include "sound.inc"
         .include "word_util.inc"
         .include "zeropage.inc"
@@ -42,6 +43,13 @@ start:
         lda #0
         sta $4010 ; DMC DMA
 
+        lda #1
+        sta NmiSoftDisable
+
+        lda #(VBLANK_NMI)
+        sta PPUCTRL
+        cli ; enable interrupts
+
         jsr init_audio
 
         lda #2
@@ -57,13 +65,21 @@ start:
         lda #1
         sta seed
 
+        
+        ; FOR NOW, do demo init of our first level
+        jsr demo_init_map
+
+        ; Now with valid HUD graphics, it should be safe to
+        ; enable normal NMI things
+
+        lda #0
+        sta NmiSoftDisable
+
         ; now enable rendering and proceed to the main game loop
         lda #$1E
         sta PPUMASK
         lda #(VBLANK_NMI | BG_0000 | OBJ_1000)
         sta PPUCTRL
-
-        cli ; enable interrupts
 
 main_loop:
         jsr poll_input
