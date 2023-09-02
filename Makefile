@@ -11,32 +11,17 @@ PRG_ASM_FILES := $(wildcard $(SOURCEDIR)/*.s)
 O_FILES := \
   $(patsubst $(SOURCEDIR)/%.s,$(BUILDDIR)/%.o,$(PRG_ASM_FILES))
 
-ANIMATED_PNG_FILES := $(wildcard $(ARTDIR)/animated_tiles/*.png)
-ANIMATED_CHR_FILES := \
-	$(patsubst $(ARTDIR)/animated_tiles/%.png,$(BUILDDIR)/animated_tiles/%.chr,$(ANIMATED_PNG_FILES)) \
+LEVEL_TMX_FILES := $(wildcard $(ARTDIR)/levels/*.tmx)
+LEVEL_INCS_FILES := \
+	$(patsubst $(ARTDIR)/levels/%.tmx,$(BUILDDIR)/levels/%.incs,$(LEVEL_TMX_FILES)) \
 
-STATIC_PNG_FILES := $(wildcard $(ARTDIR)/static_tiles/*.png)
-STATIC_CHR_FILES := \
-	$(patsubst $(ARTDIR)/static_tiles/%.png,$(BUILDDIR)/static_tiles/%.chr,$(STATIC_PNG_FILES)) \
-
-LAYOUT_TMX_FILES := $(wildcard $(ARTDIR)/layouts/*.tmx)
-LAYOUT_INCS_FILES := \
-	$(patsubst $(ARTDIR)/layouts/%.tmx,$(BUILDDIR)/layouts/%.incs,$(LAYOUT_TMX_FILES)) \
-
-FLOOR_TMX_FILES := $(wildcard $(ARTDIR)/floors/*.tmx)
-FLOOR_INCS_FILES := \
-	$(patsubst $(ARTDIR)/floors/%.tmx,$(BUILDDIR)/floors/%.incs,$(FLOOR_TMX_FILES)) \
-
-.PRECIOUS: $(BIN_FILES) $(ANIMATED_CHR_FILES) $(STATIC_CHR_FILES) $(LAYOUT_INCS_FILES) $(FLOOR_INCS_FILES)
+.PRECIOUS: $(BIN_FILES) $(ANIMATED_CHR_FILES) $(STATIC_CHR_FILES) $(LEVEL_INCS_FILES)
 
 all: dir $(ROM_NAME)
 
 dir:
 	@mkdir -p build
-	@mkdir -p build/animated_tiles
-	@mkdir -p build/static_tiles
-	@mkdir -p build/layouts
-	@mkdir -p build/floors
+	@mkdir -p build/levels
 
 clean:
 	-@rm -rf build
@@ -64,7 +49,7 @@ everdrive: dir $(ROM_NAME)
 $(ROM_NAME): $(SOURCEDIR)/action53.cfg $(O_FILES)
 	ld65 -m $(BUILDDIR)/map.txt --dbgfile $(DBG_NAME) -o $@ -C $^
 
-$(BUILDDIR)/%.o: $(SOURCEDIR)/%.s $(BIN_FILES) $(ANIMATED_CHR_FILES) $(STATIC_CHR_FILES) $(LAYOUT_INCS_FILES) $(FLOOR_INCS_FILES)
+$(BUILDDIR)/%.o: $(SOURCEDIR)/%.s $(BIN_FILES) $(LEVEL_INCS_FILES)
 	ca65 -g -o $@ $<
 
 $(BUILDDIR)/animated_tiles/%.chr: $(ARTDIR)/animated_tiles/%.png
@@ -73,8 +58,5 @@ $(BUILDDIR)/animated_tiles/%.chr: $(ARTDIR)/animated_tiles/%.png
 $(BUILDDIR)/static_tiles/%.chr: $(ARTDIR)/static_tiles/%.png
 	tools/statictile.py $< $@
 
-$(BUILDDIR)/layouts/%.incs: $(ARTDIR)/layouts/%.tmx
-	tools/layout.py $< $@
-
-$(BUILDDIR)/floors/%.incs: $(ARTDIR)/floors/%.tmx
-	tools/floor.py $< $@
+$(BUILDDIR)/levels/%.incs: $(ARTDIR)/levels/%.tmx
+	tools/convert_level.py $< $@
