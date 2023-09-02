@@ -8,8 +8,35 @@
 
 test_chr:
     .incbin "../art/test_chr.chr"
+test_palette:
+    .incbin "../art/test_pal.pal"
+test_nametable:
+    .incbin "../art/test_nametable.nam"
 
 .proc FAR_init_palettes
+SourceAddr := R0
+    lda PPUSTATUS
+
+    st16 SourceAddr, test_palette
+    set_ppuaddr #$3F10
+    ldy #0
+obj_loop:
+    lda (SourceAddr), y
+    sta PPUDATA
+    iny
+    cpy #16
+    bne obj_loop
+
+    st16 SourceAddr, test_palette
+    set_ppuaddr #$3F00
+    ldy #0
+bg_loop:
+    lda (SourceAddr), y
+    sta PPUDATA
+    iny
+    cpy #16
+    bne bg_loop
+
     rts
 .endproc
 
