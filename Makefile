@@ -15,6 +15,10 @@ LEVEL_TMX_FILES := $(wildcard $(ARTDIR)/levels/*.tmx)
 LEVEL_INCS_FILES := \
 	$(patsubst $(ARTDIR)/levels/%.tmx,$(BUILDDIR)/levels/%.incs,$(LEVEL_TMX_FILES)) \
 
+ANIMATION_PNG_FILES := $(wildcard $(ARTDIR)/animations/*.png)
+ANIMATION_INCS_FILES := \
+	$(patsubst $(ARTDIR)/animations/%.png,$(BUILDDIR)/animations/%.anim.incs,$(ANIMATION_PNG_FILES)) \
+
 .PRECIOUS: $(BIN_FILES) $(ANIMATED_CHR_FILES) $(STATIC_CHR_FILES) $(LEVEL_INCS_FILES)
 
 all: dir $(ROM_NAME)
@@ -22,6 +26,7 @@ all: dir $(ROM_NAME)
 dir:
 	@mkdir -p build
 	@mkdir -p build/levels
+	@mkdir -p build/animations
 
 clean:
 	-@rm -rf build
@@ -49,7 +54,7 @@ everdrive: dir $(ROM_NAME)
 $(ROM_NAME): $(SOURCEDIR)/action53.cfg $(O_FILES)
 	ld65 -m $(BUILDDIR)/map.txt --dbgfile $(DBG_NAME) -o $@ -C $^
 
-$(BUILDDIR)/%.o: $(SOURCEDIR)/%.s $(BIN_FILES) $(LEVEL_INCS_FILES)
+$(BUILDDIR)/%.o: $(SOURCEDIR)/%.s $(BIN_FILES) $(LEVEL_INCS_FILES) $(ANIMATION_INCS_FILES)
 	ca65 -g -o $@ $<
 
 $(BUILDDIR)/animated_tiles/%.chr: $(ARTDIR)/animated_tiles/%.png
@@ -60,3 +65,6 @@ $(BUILDDIR)/static_tiles/%.chr: $(ARTDIR)/static_tiles/%.png
 
 $(BUILDDIR)/levels/%.incs: $(ARTDIR)/levels/%.tmx
 	tools/convert_level.py $< $@
+
+$(BUILDDIR)/animations/%.anim.incs: $(ARTDIR)/animations/%.png
+	tools/convert_metasprite.py $< $(basename $(basename $@)).chr.incs $@ 64 64 4

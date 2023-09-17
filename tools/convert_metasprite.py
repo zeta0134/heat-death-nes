@@ -3,8 +3,10 @@
 from PIL import Image
 
 
-import sys, math
+import sys, math, os, re
 from dataclasses import dataclass
+
+from ca65 import ca65_label, ca65_byte_literal, pretty_print_table
 
 @dataclass
 class RawPattern:
@@ -153,9 +155,56 @@ def deduplicate_patterns(frame_raw_patterns):
     frame_indexed_patterns.append(indexed_patterns)
   return (chr_patterns, frame_indexed_patterns)
 
+def nice_label(full_path_and_filename):
+  (_, plain_filename) = os.path.split(full_path_and_filename)
+  (base_filename, _) = os.path.splitext(plain_filename)
+  safe_label = re.sub(r'[^A-Za-z0-9\_]', '_', base_filename)
+  return safe_label
+
+def write_chr_tiles(chr_tiles, filename):
+  chr_bytes = []
+  for tile in chr_tiles:
+    chr_bytes = chr_bytes + tile
+  with open(filename, "w") as output_file:
+    chr_label = nice_label(filename)
+
+    output_file.write(".export %s\n\n" % chr_label)
+    output_file.write(ca65_label(chr_label) + "\n")
+    pretty_print_table(chr_bytes, output_file, 16)
+    output_file.write("\n")
+
+def write_metasprite_animation(frame_indexed_patterns, base_framerate, filename):
+  with open(filename, "w") as output_file:
+    anim_label = nice_label(filename)
+
+    output_file.write(f"{anim_label}:\n")
+    for f in range(0, len(frame_indexed_patterns)):
+      output_file.write(f"  .byte {ca65_byte_literal(base_framerate)} ; Duration\n")
+      output_file.write(f"  .word {anim_label}_oam_{f}\n")
+    output_file.write("  .byte $FF ; end of list\n")
+    output_file.write("\n")
+
+    for f in range(0, len(frame_indexed_patterns)):
+      indexed_patterns = frame_indexed_patterns[f]
+      output_file.write(f"{anim_label}_oam_{f}:\n")
+      output_file.write(f"  .byte {ca65_byte_literal(len(indexed_patterns))} ; Length\n")
+      output_file.write(f"  ;     YPOS, TILE, ATTR, XPOS\n")
+      for i in range(0, len(indexed_patterns)):
+        oam_entry = indexed_patterns[i]
+        x = ca65_byte_literal(oam_entry.x)
+        y = ca65_byte_literal(oam_entry.y)
+        tile_id = ca65_byte_literal(oam_entry.tile_id)
+        attributes = ca65_byte_literal(
+          int(oam_entry.horizontal_flip << 6) + 
+          int(oam_entry.vertical_flip << 7) +
+          oam_entry.subpalette
+        )
+        output_file.write(f"  .byte  {y},  {tile_id},  {attributes},  {x}\n")
+      output_file.write("\n")
+
 if __name__ == '__main__':
   if len(sys.argv) != 7:
-    print("Usage: convert_metasprite.py input_image.png output.chr output.incs <width> <height> <framebase>")
+    print("Usage: convert_metasprite.py input_image.png output_chr.incs output.incs <width> <height> <framebase>")
     sys.exit(-1)
   input_image = sys.argv[1]
   output_chr = sys.argv[2]
@@ -169,8 +218,5 @@ if __name__ == '__main__':
   frame_raw_patterns = extract_frame_patterns(frame_cels)
   (chr_patterns, frame_indexed_patterns) = deduplicate_patterns(frame_raw_patterns)
 
-  print(f"Found {len(chr_patterns)} unique tiles!")
-  for f in range(0, len(frame_indexed_patterns)):
-    print(f"Frame {f} has these indexed patterns:")
-    for p in range(0, len(frame_indexed_patterns[f])):
-      print(frame_indexed_patterns[f][p])
+  write_chr_tiles(chr_patterns, output_chr)
+  write_metasprite_animation(frame_indexed_patterns, base_framerate, output_animation)

@@ -7,14 +7,15 @@
     .segment "PRG0_8000"
 
 test_chr:
-    .incbin "../art/test_chr.chr"
+    .incbin "../art/test_chr_bg.chr"
+    .incbin "../art/test_chr_obj.chr", 0, 16
+    .include "../build/animations/floaty-crystal-test.chr.incs"
 test_palette:
     .incbin "../art/test_pal.pal"
 test_nametable:
     .incbin "../art/test_nametable.nam"
 test_nametable_2:
     .incbin "../art/test_nametable_2.nam"
-
 
 .proc FAR_init_palettes
 SourceAddr := R0

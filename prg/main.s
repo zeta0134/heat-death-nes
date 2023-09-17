@@ -12,10 +12,14 @@
         .include "prng.inc"
         .include "scrolling.inc"
         .include "sound.inc"
+        .include "sprites.inc"
         .include "word_util.inc"
         .include "zeropage.inc"
 
 .segment "PRGFIXED_C000"
+
+test_animation:
+    .include "../build/animations/floaty-crystal-test.anim.incs"
 
 .proc wait_for_next_vblank
         debug_color 0
@@ -81,8 +85,14 @@ start:
         lda #(VBLANK_NMI | BG_0000 | OBJ_1000)
         sta PPUCTRL
 
+        jsr init_demo_metasprite
+
 main_loop:
         jsr poll_input
+
+        jsr reset_oam
+        jsr update_animations
+        jsr draw_metasprites
 
         jsr debug_scroll_playfield
         jsr wait_for_next_vblank
@@ -90,3 +100,28 @@ main_loop:
         jmp main_loop
 
 
+.proc init_demo_metasprite
+        ldx #0
+
+        set_animation floaty_crystal_test_anim
+
+        lda #METASPRITE_ACTIVE
+        sta metasprite_table + MetaSpriteState::Flags, x
+
+        lda #50
+        sta metasprite_table + MetaSpriteState::ScreenPosX, x
+        lda #0
+        sta metasprite_table + MetaSpriteState::ScreenPosX+1, x
+
+        lda #50
+        sta metasprite_table + MetaSpriteState::ScreenPosY, x
+        lda #0
+        sta metasprite_table + MetaSpriteState::ScreenPosY+1, x
+
+        lda #1
+        sta metasprite_table + MetaSpriteState::BaseTileId, x
+        lda #0
+        sta metasprite_table + MetaSpriteState::Palette, x        
+
+        rts
+.endproc
