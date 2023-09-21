@@ -9,9 +9,12 @@
 test_chr:
     .incbin "../art/test_chr_bg.chr"
     .incbin "../art/test_chr_obj.chr", 0, 16
-    .include "../build/animations/floaty-crystal-test.chr.incs"
+    ;.include "../build/animations/floaty-crystal-test.chr.incs"
+    .include "../build/animations/robot-idle.chr.incs"
 test_palette:
     .incbin "../art/test_pal.pal"
+test_palette_obj:
+    .incbin "../art/test_pal_obj.pal"
 test_nametable:
     .incbin "../art/test_nametable.nam"
 test_nametable_2:
@@ -21,7 +24,7 @@ test_nametable_2:
 SourceAddr := R0
     lda PPUSTATUS
 
-    st16 SourceAddr, test_palette
+    st16 SourceAddr, test_palette_obj
     set_ppuaddr #$3F10
     ldy #0
 obj_loop:

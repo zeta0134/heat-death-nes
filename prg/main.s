@@ -19,7 +19,8 @@
 .segment "PRGFIXED_C000"
 
 test_animation:
-    .include "../build/animations/floaty-crystal-test.anim.incs"
+    ;.include "../build/animations/floaty-crystal-test.anim.incs"
+    .include "../build/animations/robot-idle.anim.incs"
 
 .proc wait_for_next_vblank
         debug_color 0
@@ -103,7 +104,7 @@ main_loop:
 .proc init_demo_metasprite
         ldx #0
 
-        set_animation floaty_crystal_test_anim
+        set_animation robot_idle_anim
 
         lda #METASPRITE_ACTIVE
         sta metasprite_table + MetaSpriteState::Flags, x
